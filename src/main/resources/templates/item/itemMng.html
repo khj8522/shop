@@ -58,7 +58,7 @@
                     <a th:href="'/admin/item/'+${item.id}" th:text="${item.itemNm}"></a>
                 </td>
                 <td th:text="${item.itemSellStatus == T(com.shop.constant.ItemSellStatus).SELL} ? '판매중' : '품절'"></td>
-                <td th:text="${item.createdBy}"></td>
+                <td th:text="${item.createBy}"></td>
                 <td th:text="${item.regTime}"></td>
             </tr>
             </tbody>
@@ -101,7 +101,7 @@
             </select>
             <select th:field="*{searchBy}" class="form-control" style="width:auto;">
                 <option value="itemNm">상품명</option>
-                <option value="createdBy">등록자</option>
+                <option value="createBy">등록자</option>
             </select>
             <input th:field="*{searchQuery}" type="text" class="form-control" placeholder="검색어를 입력해주세요">
             <button id="searchBtn" type="submit" class="btn btn-primary">검색</button>

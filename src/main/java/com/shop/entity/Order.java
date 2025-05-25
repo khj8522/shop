@@ -37,4 +37,36 @@ public class Order {
 
     private LocalDateTime updateTime;
 
+    public void addOrderItem(OrderItem orderItem) {
+        orderItems.add(orderItem); // 주문 상품 리스트
+        orderItem.setOrder(this); // 어떤 주문의 주문 상품인지 연결
+    }
+
+    public static Order createOrder(Member member, List<OrderItem> orderItemList) {
+        Order order = new Order();
+        order.setMember(member); // 주문한 회원 연결
+
+        for(OrderItem orderItem : orderItemList) {
+            order.addOrderItem(orderItem);
+        }
+
+        order.setOrderStatus(OrderStatus.ORDER); // 주문 상태 설정
+        order.setOrderDate(LocalDateTime.now()); // 주문 날짜 현재 시각
+        return order;
+    }
+
+    public int getTotalPrice() {
+        int totalPrice = 0;
+        for(OrderItem orderItem : orderItems){
+            totalPrice += orderItem.getTotalPrice();
+        }
+        return totalPrice;
+    }
+
+    public void cancelOrder() {
+        this.orderStatus = OrderStatus.CANCEL;
+        for (OrderItem orderItem : orderItems) {
+            orderItem.cancel();
+        }
+    }
 }

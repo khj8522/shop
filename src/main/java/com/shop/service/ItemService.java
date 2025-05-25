@@ -57,7 +57,7 @@ public class ItemService {
         return item.getId();
     }
 
-    // 수정 페이지 불러오기
+    //상세 페이지 불러오기
     @Transactional(readOnly = true) // 상품 이미지와 상품 상세 정보를 가져옴
     public ItemFormDto getItemDtl(Long itemId){
         List<ItemImg> itemImgList = itemImgRepository.findByItemIdOrderByIdAsc(itemId);
