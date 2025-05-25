@@ -148,16 +148,18 @@
                     alert("주문이 완료 되었습니다.");
                     location.href='/orders';
                 },
-                error : function(jqXHR, status, error){
-
-                    if(jqXHR.status == '401'){
-                        alert('로그인 후 이용해주세요');
-                        location.href='/members/login';
-                    } else{
-                        alert(jqXHR.responseJSON.message);
-                    }
-
+                error: function(jqXHR, status, error) {
+                if (jqXHR.status == '401') {
+                    alert('로그인 후 이용해주세요');
+                    location.href = '/members/login';
+                } else {
+                    // responseJSON이 없으면 "알 수 없는 오류 발생" 출력
+                    let errorMessage = jqXHR.responseJSON && jqXHR.responseJSON.message
+                        ? jqXHR.responseJSON.message
+                        : "알 수 없는 오류가 발생했습니다.";
+                    alert(errorMessage);
                 }
+            }
             });
         }
 

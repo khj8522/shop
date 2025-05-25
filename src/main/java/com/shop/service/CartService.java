@@ -38,6 +38,7 @@ public class CartService {
                 .orElseThrow(EntityNotFoundException::new);
         Member member = memberRepository.findByEmail(email);
 
+
         Cart cart = cartRepository.findByMemberId(member.getId());
         if(cart == null){
             cart = Cart.createCart(member);

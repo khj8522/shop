@@ -43,13 +43,11 @@ public class CartController {
             for (FieldError fieldError : fieldErrors) {
                 sb.append(fieldError.getDefaultMessage());
             }
-
             return new ResponseEntity<String>(sb.toString(), HttpStatus.BAD_REQUEST);
         }
 
         String email = principal.getName();
         Long cartItemId;
-
         try {
             cartItemId = cartService.addCart(cartItemDto, email);
         } catch (Exception e) {

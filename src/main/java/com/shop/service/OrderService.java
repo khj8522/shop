@@ -107,6 +107,7 @@ public class OrderService {
             orderItemList.add(orderItem);
         }
         Order order = Order.createOrder(member,orderItemList);
+        orderRepository.save(order);
         return order.getId();
     }
 }
