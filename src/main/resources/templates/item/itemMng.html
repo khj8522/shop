@@ -3,6 +3,11 @@
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{layouts/layout1}">
 
+<head>
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+</head>
+
 <!-- 사용자 스크립트 추가 -->
 <th:block layout:fragment="script">
     <script th:inline="javascript">
@@ -25,6 +30,33 @@
             + "&searchBy=" + searchBy
             + "&searchQuery=" + searchQuery;
         }
+
+         function deleteItem(itemId) {
+             if (!confirm("정말 삭제하시겠습니까?")) return;
+
+            var token = $("meta[name='_csrf']").attr("content");
+            var header = $("meta[name='_csrf_header']").attr("content");
+            fetch(`/admin/item/${itemId}`, {
+                method: 'DELETE',
+                headers: {
+                    [header]: token
+                }
+            })
+            .then(response => {
+                if (response.ok) {
+                    alert('삭제되었습니다.');
+                    location.reload();
+                } else {
+                    return response.text().then(msg => {
+                        alert('삭제 실패: ' + msg);
+                    });
+                }
+            })
+            .catch(error => {
+                alert('삭제 중 오류 발생');
+                console.error(error);
+            });
+    }
 
     </script>
 </th:block>
@@ -60,6 +92,12 @@
                 <td th:text="${item.itemSellStatus == T(com.shop.constant.ItemSellStatus).SELL} ? '판매중' : '품절'"></td>
                 <td th:text="${item.createBy}"></td>
                 <td th:text="${item.regTime}"></td>
+                <td>
+                    <button type="button"
+                            th:value="${item.id}"
+                            onclick="deleteItem(this.getAttribute('value'))">삭제</button>
+                </td>
+
             </tr>
             </tbody>
         </table>

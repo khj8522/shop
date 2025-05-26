@@ -74,6 +74,13 @@ public class ItemService {
         return itemFormDto;
     }
 
+    @Transactional
+    public void deleteItem(Long itemId) {
+        Item item = itemRepository.findById(itemId)
+                .orElseThrow(EntityNotFoundException::new);
+        itemRepository.delete(item);
+    }
+
     // 수정 하기
     public Long updateItem(ItemFormDto itemFormDto, List<MultipartFile> itemImgFileList) throws Exception{
         //상품 수정
