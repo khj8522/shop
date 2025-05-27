@@ -4,9 +4,7 @@ import com.shop.dto.OrderDto;
 import com.shop.dto.OrderHistDto;
 import com.shop.dto.OrderItemDto;
 import com.shop.entity.*;
-import com.shop.repository.ItemRepository;
-import com.shop.repository.MemberRepository;
-import com.shop.repository.OrderRepository;
+import com.shop.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,7 +13,6 @@ import jakarta.persistence.EntityNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.shop.repository.ItemImgRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -26,6 +23,8 @@ import org.thymeleaf.util.StringUtils;
 @Transactional
 @RequiredArgsConstructor
 public class OrderService {
+
+    private final ItemReviewRepository itemReviewRepository;
 
     private final ItemRepository itemRepository;
 
@@ -65,8 +64,11 @@ public class OrderService {
             for (OrderItem orderItem : orderItems) {
                 ItemImg itemImg = itemImgRepository.findByItemIdAndRepimgYn
                         (orderItem.getItem().getId(), "Y");
+
                 OrderItemDto orderItemDto =
                         new OrderItemDto(orderItem, itemImg.getImgUrl());
+
+
                 orderHistDto.addOrderItemDto(orderItemDto);
             }
 

@@ -21,4 +21,20 @@ body {
     margin-top: 50px;
     margin-left: 200px;
     margin-right: 200px;
-}
+}.review-form {
+     margin-top: 15px;
+     margin-bottom: 20px;
+     padding: 10px;
+ }
+
+ .review-form textarea {
+     font-size: 16px;
+     padding: 10px;
+     border-radius: 5px;
+     border: 1px solid #ccc;
+ }.star-rating .star {
+          font-size: 24px;
+          color: gold;
+          cursor: pointer;
+          margin-right: 5px;
+ }

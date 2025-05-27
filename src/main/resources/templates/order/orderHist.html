@@ -48,11 +48,74 @@
                 }
             });
         }
+        function submitReview(orderItemId) {
+        var token = $("meta[name='_csrf']").attr("content");
+        var header = $("meta[name='_csrf_header']").attr("content");
+
+        var rating = $("#rating-" + orderItemId).val();
+        var content = $("#content-" + orderItemId).val();
+
+        if (!rating || rating < 1 || rating > 5) {
+            alert("별점은 1에서 5 사이여야 합니다.");
+            return;
+        }
+        if (!content) {
+            alert("리뷰 내용을 입력해주세요.");
+            return;
+        }
+
+        var data = {
+            orderItemId: orderItemId,
+            rating: parseInt(rating),
+            content: content
+        };
+
+        $.ajax({
+            url: "/reviews",
+            type: "POST",
+            contentType: "application/json",
+            data: JSON.stringify(data),
+            beforeSend: function(xhr) {
+                xhr.setRequestHeader(header, token);
+            },
+            success: function(response) {
+            alert("리뷰 작성이 완료되었습니다.");
+
+            var stars = "";
+            for (let i = 1; i <= 5; i++) {
+                stars += (i <= rating) ? "&#9733;" : "&#9734;";
+            }
+
+            var parentDiv = $("#rating-" + orderItemId).closest("div");
+            parentDiv.html(
+                "<p><strong>별점:</strong> <span>" + stars + "</span></p>" +
+                "<p><strong>내 리뷰:</strong> " + content + "</p>");
+            },
+            error: function(xhr) {
+                if(xhr.status === 401) {
+                    alert("로그인 후 이용해주세요.");
+                    location.href = "/members/login";
+                } else {
+                    alert(xhr.responseText);
+                }
+            }
+        });
+    }
+        function selectStar(orderItemId, rating) {
+        $("#rating-" + orderItemId).val(rating); // hidden input에 값 저장
+
+        const stars = $("#star-rating-" + orderItemId + " .star");
+        stars.each(function(index) {
+            if (index < rating) {
+                $(this).html("&#9733;"); // ★
+            } else {
+                $(this).html("&#9734;"); // ☆
+            }
+        });
+    }
     </script>
 
 </th:block>
-
-
 <!-- 사용자 CSS 추가 -->
 <th:block layout:fragment="css">
     <style>
@@ -108,18 +171,45 @@
         <div class="card d-flex">
             <div th:each="orderItem : ${order.orderItemDtoList}" class="d-flex mb-3">
                 <div class="repImgDiv">
-                    <img th:src="${orderItem.imgUrl}" class = "rounded repImg" th:alt="${orderItem.itemNm}">
+                    <img th:src="${orderItem.imgUrl}" class="rounded repImg" th:alt="${orderItem.itemNm}">
                 </div>
-                <div class="align-self-center w-75">
+                <div class="ml-3 flex-grow-1">
                     <span th:text="${orderItem.itemNm}" class="fs24 font-weight-bold"></span>
                     <div class="fs18 font-weight-light">
-                        <span th:text="${orderItem.orderPrice} +'원'"></span>
-                        <span th:text="${orderItem.count} +'개'"></span>
+                        <span th:text="${orderItem.orderPrice} + '원'"></span>
+                        <span th:text="${orderItem.count} + '개'"></span>
                     </div>
+
+                    <!-- 리뷰 작성 폼 (조건부 표시) -->
+                    <th:block th:if="${order.orderStatus == T(com.shop.constant.OrderStatus).ORDER and !orderItem.reviewed}">
+                        <div class="review-form mt-3">
+                            <input type="hidden" name="orderItemId" th:value="${orderItem.id}" />
+                            <label th:for="'rating-' + ${orderItem.id}">별점:</label>
+                            <div class="star-rating" th:id="'star-rating-' + ${orderItem.id}">
+                    <span th:each="i : ${#numbers.sequence(1,5)}"
+                          th:attr="data-value=${i}, onclick='selectStar(' + ${orderItem.id} + ',' + ${i} + ')'"
+                          class="star">&#9734;</span>
+                          </div>
+                          <input type="hidden" th:id="'rating-' + ${orderItem.id}" name="rating" required />
+
+                          <label th:for="'content-' + ${orderItem.id}" class="mt-2">리뷰 내용:</label>
+                          <textarea th:id="'content-' + ${orderItem.id}" name="content"
+                                    rows="5" cols="50" style="resize: vertical; width: 100%; max-width: 500px;" required>
+                          </textarea>
+                          <button type="button" class="mt-2" th:attr="onclick='submitReview(' + ${orderItem.id} + ')'">리뷰 작성</button>
+                        </div>
+                    </th:block>
+
+                    <!-- 이미 작성한 리뷰 표시 -->
+                    <th:block th:if="${orderItem.reviewed}">
+                        <span th:utext="${#strings.repeat('&#9733;', orderItem.reviewRating)} + ${#strings.repeat('&#9734;', 5 - orderItem.reviewRating)}"></span>
+                        </p>
+                        <p><strong>내 리뷰:</strong></p>
+                        <p th:text="${orderItem.reviewContent}"></p>
+                    </th:block>
                 </div>
             </div>
         </div>
-
     </div>
 
     <div th:with="start=${(orders.number/maxPage)*maxPage + 1}, end=(${(orders.totalPages == 0) ? 1 : (start + (maxPage - 1) < orders.totalPages ? start + (maxPage - 1) : orders.totalPages)})" >
@@ -143,6 +233,7 @@
 
         </ul>
     </div>
+
 
 </div>
 
