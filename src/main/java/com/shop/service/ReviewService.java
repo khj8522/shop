@@ -12,6 +12,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -44,4 +46,18 @@ public class ReviewService {
 
         itemReviewRepository.save(review);
     }
+
+
+    @Transactional(readOnly = true)
+    public List<ItemReview> getReviewsByItemId(Long itemId) {
+        return itemReviewRepository.findByOrderItem_ItemId(itemId);
+    }
+
+    @Transactional(readOnly = true)
+    public double getAverageRatingByItemId(Long itemId) {
+        Double avg = itemReviewRepository.findAverageRatingByItemId(itemId);
+        return avg != null ? avg : 0.0;
+    }
+
+
 }

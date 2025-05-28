@@ -19,6 +19,7 @@
             $("#count").change( function(){
                 calculateToalPrice();
             });
+            loadReviews();
         });
 
         function calculateToalPrice(){
@@ -107,6 +108,41 @@
                 }
             });
         }
+
+        function loadReviews() {
+    var itemId = $("#itemId").val();
+
+    $.ajax({
+        url: "/api/reviews/item/" + itemId,
+        type: "GET",
+        success: function(response) {
+            if (!response.reviews.length) {
+                $("#reviewList").html("<p>아직 등록된 리뷰가 없습니다.</p>");
+                $("#averageRating").text("없음");
+                return;
+            }
+
+            $("#averageRating").text(response.averageRating.toFixed(1));
+
+            var html = "";
+            response.reviews.forEach(function(review) {
+                html += `
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <h6 class="card-subtitle mb-2 text-muted">${review.memberEmail} | ${review.rating}점</h6>
+                            <p class="card-text">${review.content}</p>
+                            <small class="text-muted">${review.createdAt.replace('T', ' ').substring(0, 16)}</small>
+                        </div>
+                    </div>`;
+            });
+            $("#reviewList").html(html);
+        },
+        error: function() {
+            $("#averageRating").text("오류");
+            $("#reviewList").html("<p class='text-danger'>리뷰 정보를 불러오는 데 실패했습니다.</p>");
+        }
+    });
+}
     </script>
 </th:block>
 
@@ -196,6 +232,11 @@
         <img th:if="${not #strings.isEmpty(itemImg.imgUrl)}" th:src="${itemImg.imgUrl}" class="rounded mgb-15" width="800">
     </div>
 
+    <div class="mgt-50">
+        <h4 class="mb-3">상품 리뷰</h4>
+        <div><strong>평균 평점:</strong> <span id="averageRating">-</span> / 5</div>
+        <div id="reviewList" class="mgt-30"></div>
+    </div>
 </div>
 
 </html>
