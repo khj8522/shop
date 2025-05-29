@@ -110,8 +110,8 @@ public class ItemRepositoryCustomImpl implements ItemRepositoryCustom{
                 .where(itemImg.repimgYn.eq("Y"))
                 .where(itemNmLike(itemSearchDto.getSearchQuery()))
                 .orderBy(item.id.desc())
-                .offset(pageable.getOffset())
-                .limit(pageable.getPageSize())
+                .offset(pageable.getOffset()) // 시작 인덱스 가져오기
+                .limit(pageable.getPageSize()) // 한페이지에 보여줄 개수
                 .fetch();
 
         long total = queryFactory
