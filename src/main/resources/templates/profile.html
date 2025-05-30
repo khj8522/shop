@@ -18,26 +18,62 @@
     <th:block layout:fragment="css"></th:block>
 </head>
 <body>
-<!-- Header 포함 -->
+
 <div th:replace="fragments/header::header"></div>
 
-<!-- Profile content -->
+
 <div layout:fragment="content" class="container mt-4">
     <h1>프로필 정보</h1>
     <div class="card">
         <div class="card-body">
             <h5 class="card-title">사용자 정보</h5>
 
-            <!-- 이름, 이메일, 주소, 권한을 조건에 따라 표시 -->
+            <!-- 이름, 이메일, 주소, 권한 -->
             <p><strong>이름:</strong> <span th:text="${member != null ? member.name : '이름 없음'}"></span></p>
             <p><strong>이메일:</strong> <span th:text="${member != null ? member.email : '이메일 없음'}"></span></p>
             <p><strong>주소:</strong> <span th:text="${member != null ? member.address : '주소 없음'}"></span></p>
             <p><strong>권한:</strong> <span th:text="${member != null ? member.role : '권한 없음'}"></span></p>
+            <form th:action="@{/profile/change-password}" method="post">
+                <div class="form-group">
+                    <label for="currentPassword">현재 비밀번호</label>
+                    <input type="password" class="form-control" id="currentPassword" name="currentPassword" placeholder="현재 비밀번호를 입력하세요" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="newPassword">새 비밀번호</label>
+                    <input type="password" class="form-control" id="newPassword" name="newPassword" placeholder="새 비밀번호를 입력하세요" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="confirmPassword">새 비밀번호 확인</label>
+                    <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" placeholder="새 비밀번호를 다시 입력하세요" required>
+                </div>
+
+                <button type="submit" class="btn btn-primary">비밀번호 변경</button>
+            </form>
         </div>
     </div>
 </div>
+<div th:if="${param.passwordChanged}" class="alert alert-success alert-dismissible fade show"
+     role="alert" style="position: fixed; top: 10px; left: 50%; transform:
+     translateX(-50%); z-index: 1050; width: 50%; max-width: 600px;">
+    <strong>비밀번호가 성공적으로 변경되었습니다!</strong>
+    <button type="button" class="close" data-dismiss="alert" aria-label="Close" style="outline:none;">
+        <span aria-hidden="true">&times;</span>
+    </button>
+</div>
 
-<!-- Footer 포함 -->
+<div th:if="${errorMessage}"
+     class="alert alert-danger alert-dismissible fade show"
+     role="alert"
+     style="position: fixed; top: 10px; left: 50%; transform: translateX(-50%);
+            z-index: 1050; width: 50%; max-width: 600px;">
+    <strong th:text="${errorMessage}"></strong>
+    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+    </button>
+</div>
+
 <div th:replace="fragments/footer::footer"></div>
 </body>
 </html>
