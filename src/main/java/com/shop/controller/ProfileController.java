@@ -36,33 +36,36 @@ public class ProfileController {
         return "profile";
     }
     @PostMapping("/profile/change-password")
-    public String changePassword(@RequestParam String currentPassword,
-                                 @RequestParam String newPassword,
-                                 @RequestParam String confirmPassword,
-                                 Principal principal,
-                                 Model model) {
+    public String changePassword(
+            @RequestParam String currentPassword,
+            @RequestParam String newPassword,
+            @RequestParam String confirmPassword,
+            Principal principal,
+            Model model) {
 
         Member member = memberRepository.findByEmail(principal.getName());
-
         if (member == null) {
             model.addAttribute("errorMessage", "사용자를 찾을 수 없습니다.");
-            return "profile"; // 에러 메시지 포함해서 profile.html로 돌아감
+            model.addAttribute("member", null);
+            return "profile";  // 리다이렉트 하지 않고 뷰를 바로 보여줌
         }
 
         if (!passwordEncoder.matches(currentPassword, member.getPassword())) {
             model.addAttribute("errorMessage", "현재 비밀번호가 일치하지 않습니다.");
-            return "profile";
+            model.addAttribute("member", member);
+            return "profile";  // 에러 메시지와 함께 뷰를 렌더링
         }
 
         if (!newPassword.equals(confirmPassword)) {
-            model.addAttribute("errorMessage", "새 비밀번호가 일치하지 않습니다.");
+            model.addAttribute("errorMessage", "새 비밀번호가 서로 일치하지 않습니다.");
+            model.addAttribute("member", member);
             return "profile";
         }
 
         member.setPassword(passwordEncoder.encode(newPassword));
         memberRepository.save(member);
 
-        return "redirect:/members/profile?passwordChanged=true";
+        return "redirect:/members/profile?passwordChanged=true";  // 성공 시에만 리다이렉트
     }
 
 }
