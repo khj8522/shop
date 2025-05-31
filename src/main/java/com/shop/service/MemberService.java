@@ -3,6 +3,7 @@ package com.shop.service;
 import com.shop.entity.Member;
 import com.shop.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -37,10 +38,22 @@ public class MemberService implements UserDetailsService {
             throw new UsernameNotFoundException(email);
         }
 
+        if (!member.isActive()) {
+            throw new DisabledException("탈퇴한 계정입니다.");
+        }
+
         return User.builder()
                 .username(member.getEmail())
                 .password(member.getPassword())
                 .roles(member.getRole().toString())
                 .build();
+    }
+
+    @Transactional
+    public void withdrawMember(Long memberId) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new UsernameNotFoundException("해당 회원이 없습니다."));
+
+        member.setActive(false); // soft delete 처리
     }
 }

@@ -38,6 +38,11 @@ public class Member extends  BaseEntity implements UserDetails {
     @Enumerated(EnumType.STRING)
     private Role role;
 
+    @Column(name = "is_active",nullable = false)
+    private boolean active = true;
+
+
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         // 역할을 기반으로 권한을 반환
@@ -71,7 +76,7 @@ public class Member extends  BaseEntity implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return true;  // 계정 활성화 여부
+        return active; // false이면 로그인 차단 (게정 활성화 여부)
     }
 
     public static Member createMember(MemberFormDto memberFormDto, PasswordEncoder passwordEncoder){
@@ -82,6 +87,7 @@ public class Member extends  BaseEntity implements UserDetails {
         String password = passwordEncoder.encode(memberFormDto.getPassword());
         member.setPassword(password);
         member.setRole(Role.ADMIN);
+        member.setActive(true);
         return member;
     }
 

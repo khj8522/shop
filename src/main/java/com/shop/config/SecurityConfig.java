@@ -23,11 +23,15 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 public class SecurityConfig {
 
     @Autowired
+    private CustomAuthenticationFailureHandler customAuthenticationFailureHandler;
+
+    @Autowired
     MemberService memberService;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         return http
+
                 .csrf(csrf -> csrf
                         .csrfTokenRepository(new CookieCsrfTokenRepository())   // csrf 토큰 저장소를 http only cookie로 설정
                 ).authorizeHttpRequests(authorizeHttpRequestsCustomizer -> authorizeHttpRequestsCustomizer
@@ -39,7 +43,7 @@ public class SecurityConfig {
                         .loginPage("/members/login")
                         .defaultSuccessUrl("/", true)
                         .usernameParameter("email")
-                        .failureUrl("/members/login/error")
+                        .failureHandler(customAuthenticationFailureHandler)
                 ).logout(logoutCustomizer -> logoutCustomizer
                         .logoutRequestMatcher(new AntPathRequestMatcher("/members/logout"))
                         .logoutSuccessUrl("/")
@@ -67,6 +71,8 @@ public class SecurityConfig {
 
         AuthenticationManagerBuilder authenticationManagerBuilder = http.getSharedObject(AuthenticationManagerBuilder.class);
         authenticationManagerBuilder.authenticationProvider(authenticationProvider);
+
         return authenticationManagerBuilder.build();
     }
+
 }
