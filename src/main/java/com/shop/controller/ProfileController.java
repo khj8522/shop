@@ -1,7 +1,9 @@
 package com.shop.controller;
 
 import com.shop.entity.Member;
+import com.shop.entity.PasswordHistory;
 import com.shop.repository.MemberRepository;
+import com.shop.repository.PasswordHistoryRepository;
 import com.shop.service.MemberService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -15,9 +17,13 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.security.Principal;
+import java.util.List;
 
 @Controller
 public class ProfileController {
+
+    @Autowired
+    private PasswordHistoryRepository passwordHistoryRepository;
 
     @Autowired
     private MemberRepository memberRepository;
@@ -62,8 +68,29 @@ public class ProfileController {
             return "profile";
         }
 
-        member.setPassword(passwordEncoder.encode(newPassword));
+        // 🔒 최근 비밀번호 이력 3개 확인
+        List<PasswordHistory> recentPasswords =
+                passwordHistoryRepository.findTop3ByMemberIdOrderByChangedAtDesc(member.getId());
+
+        for (PasswordHistory history : recentPasswords) {
+            if (passwordEncoder.matches(newPassword, history.getPasswordHash())) {
+                model.addAttribute("errorMessage", "최근 사용한 비밀번호는 사용할 수 없습니다.");
+                model.addAttribute("member", member);
+                return "profile";
+            }
+        }
+
+        // 새 비밀번호로 저장
+        String encodedPassword = passwordEncoder.encode(newPassword);
+        member.setPassword(encodedPassword);
         memberRepository.save(member);
+
+        // 비밀번호 이력 저장
+        PasswordHistory history = PasswordHistory.builder()
+                .memberId(member.getId())
+                .passwordHash(encodedPassword)
+                .build();
+        passwordHistoryRepository.save(history);
 
         return "redirect:/members/profile?passwordChanged=true";  // 성공 시에만 리다이렉트
     }
