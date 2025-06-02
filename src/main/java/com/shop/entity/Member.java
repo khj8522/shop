@@ -2,15 +2,23 @@ package com.shop.entity;
 
 import com.shop.constant.Role;
 import com.shop.dto.MemberFormDto;
+import com.shop.service.MemberService;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import jakarta.persistence.*;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -90,5 +98,15 @@ public class Member extends  BaseEntity implements UserDetails {
         member.setActive(true);
         return member;
     }
+
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<PasswordHistory> passwordHistories = new ArrayList<>();
+
+    public void addPasswordHistory(PasswordHistory passwordHistory) {
+        passwordHistories.add(passwordHistory);
+        passwordHistory.setMember(this);
+    }
+
+
 
 }

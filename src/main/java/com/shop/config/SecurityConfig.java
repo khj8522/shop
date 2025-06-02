@@ -26,6 +26,9 @@ public class SecurityConfig {
     private CustomAuthenticationFailureHandler customAuthenticationFailureHandler;
 
     @Autowired
+    private CustomLoginSuccessHandler customLoginSuccessHandler;
+
+    @Autowired
     MemberService memberService;
 
     @Bean
@@ -43,6 +46,7 @@ public class SecurityConfig {
                         .loginPage("/members/login")
                         .defaultSuccessUrl("/", true)
                         .usernameParameter("email")
+                        .successHandler(customLoginSuccessHandler)
                         .failureHandler(customAuthenticationFailureHandler)
                 ).logout(logoutCustomizer -> logoutCustomizer
                         .logoutRequestMatcher(new AntPathRequestMatcher("/members/logout"))

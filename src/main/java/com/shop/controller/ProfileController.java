@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.security.Principal;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Controller
@@ -70,7 +71,7 @@ public class ProfileController {
 
         // 🔒 최근 비밀번호 이력 3개 확인
         List<PasswordHistory> recentPasswords =
-                passwordHistoryRepository.findTop3ByMemberIdOrderByChangedAtDesc(member.getId());
+                passwordHistoryRepository.findTop3ByMemberOrderByChangedAtDesc(member);
 
         for (PasswordHistory history : recentPasswords) {
             if (passwordEncoder.matches(newPassword, history.getPasswordHash())) {
@@ -87,8 +88,9 @@ public class ProfileController {
 
         // 비밀번호 이력 저장
         PasswordHistory history = PasswordHistory.builder()
-                .memberId(member.getId())
+                .member(member)
                 .passwordHash(encodedPassword)
+                .changedAt(LocalDateTime.now())
                 .build();
         passwordHistoryRepository.save(history);
 
