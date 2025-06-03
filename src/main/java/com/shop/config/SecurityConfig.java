@@ -41,6 +41,7 @@ public class SecurityConfig {
                         .requestMatchers("/css/**", "/js/**", "/img/**").permitAll()
                         .requestMatchers("/", "/members/**", "/item/**", "/images/**").permitAll() // 모두 접근 가능
                         .requestMatchers("/admin/**").hasRole("ADMIN") // admin 경로는 ADMIN Role일 경우만 접근가능
+                        .requestMatchers("/members/change-password").authenticated()
                         .anyRequest().authenticated() // 나머지 경로는 인증을 요구
                 ).formLogin(formLoginCustomizer -> formLoginCustomizer
                         .loginPage("/members/login")

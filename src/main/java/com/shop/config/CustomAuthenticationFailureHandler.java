@@ -16,6 +16,8 @@ import java.io.IOException;
 public class CustomAuthenticationFailureHandler extends SimpleUrlAuthenticationFailureHandler {
     // spring security에서 로그인 실패시 동작을 커스터마이징하기 위한 핸들러
 
+
+
     // 리다이렉트 처리를 담당
     private RedirectStrategy redirectStrategy = new DefaultRedirectStrategy();
 
@@ -24,6 +26,8 @@ public class CustomAuthenticationFailureHandler extends SimpleUrlAuthenticationF
                                         HttpServletResponse response,
                                         AuthenticationException exception) throws IOException, ServletException {
     // 로그인 요청 객체, 응답 객체, 실패 이유가 담긴 예외 객체를 받음
+
+
 
         // 기본 에러메세지
         String errorMsg = "아이디 또는 비밀번호를 확인해주세요";

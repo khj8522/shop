@@ -47,7 +47,7 @@ public class MemberController {
         }
 
         try {
-            Member member = Member.createMember(memberFormDto,passwordEncoder);
+            Member member = Member.createMember(memberFormDto,passwordEncoder,memberFormDto.getRole());
             memberService.saveMember(member);
         } catch (IllegalStateException e) {
             model.addAttribute("errorMessage", e.getMessage());
@@ -58,18 +58,29 @@ public class MemberController {
     }
     @GetMapping("/login")
     public String loginMember() {
-        return "member/memberLoginForm";  // 로그인 페이지로 이동
-    }
+        return "member/memberLoginForm";  } // 로그인 페이지로 이동
+
 
     @GetMapping("/login/error")
     public String loginError(Model model, HttpServletRequest request) {
         String errorMsg = (String) request.getSession().getAttribute("loginErrorMsg");
         Boolean isInactive = (Boolean) request.getSession().getAttribute("accountInactive");
+        String email = (String) request.getSession().getAttribute("email");
 
-        model.addAttribute("loginErrorMsg",errorMsg);
-        model.addAttribute("accountInactive",isInactive != null && isInactive);
+        if (email == null) {
+            email = request.getParameter("email");  // 로그인 실패 시 email 파라미터로 받아옴
+            if (email != null && !email.isEmpty()) {
+                request.getSession().setAttribute("email", email); // 세션에 이메일 저장
+            }
+        }
+
+        model.addAttribute("loginErrorMsg", errorMsg);
+        model.addAttribute("accountInactive", isInactive != null && isInactive);
+        model.addAttribute("email", email); // email을 모델에 전달하여 폼에 표시
+
         return "member/memberLoginForm";
     }
+
 
     @PostMapping("/{memberId}/withdraw")
     public String withdrawMember(@PathVariable Long memberId, RedirectAttributes redirectAttributes) {
@@ -81,16 +92,16 @@ public class MemberController {
         return "redirect:/";
     }
 
-    @GetMapping("/members/change-password")
+    @GetMapping("/change-password")
     public String changePasswordForm(@RequestParam(required = false) Boolean expired, Model model) {
         model.addAttribute("expired", expired != null && expired);
         return "member/changePassword";
     }
 
-    @PostMapping("/members/change-password")
+    @PostMapping("/change-password")
     public String changePassword(@AuthenticationPrincipal Member member, @RequestParam String currentPassword
-                                ,@RequestParam String newPassword, @RequestParam String confirmPassword, Model model) {
-
+                                ,@RequestParam String newPassword, @RequestParam String confirmPassword,
+                                 RedirectAttributes redirectAttributes) {
 
 
         if(member == null) {
@@ -98,13 +109,13 @@ public class MemberController {
         }
 
         if(!passwordEncoder.matches(currentPassword,member.getPassword())) {
-            model.addAttribute("errormessage", "현재 비밀번호가 일치하지 않습니다.");
-            return "member/changePassword";
+            redirectAttributes.addFlashAttribute("errorMessage", "현재 비밀번호가 일치하지 않습니다.");
+            return "redirect:/members/change-password";
         }
 
-        if(!passwordEncoder.matches(newPassword,confirmPassword)) {
-            model.addAttribute("errormessage", "새 비밀번호가 서로 일치하지 않습니다.");
-            return "member/changePassowrd";
+        if(!newPassword.equals(confirmPassword)) {
+            redirectAttributes.addFlashAttribute("errorMessage", "새 비밀번호가 서로 일치하지 않습니다.");
+            return "redirect:/members/change-password";
         }
 
         List<PasswordHistory> recentPasswords = passwordHistoryRepository
@@ -112,8 +123,8 @@ public class MemberController {
 
         for(PasswordHistory history : recentPasswords) {
             if (passwordEncoder.matches(newPassword, history.getPasswordHash())) {
-                model.addAttribute("errormessage", "최근 사용한 비밀번호는 사용할 수 없습니다.");
-                return "member/changePassword";
+                redirectAttributes.addFlashAttribute("errorMessage", "최근 사용한 비밀번호는 사용할 수 없습니다.");
+                return "redirect:/members/change-password";
             }
         }
 
@@ -128,6 +139,30 @@ public class MemberController {
                 .build();
         passwordHistoryRepository.save(newHistory);
 
+        redirectAttributes.addFlashAttribute("successMessage", "비밀번호가 성공적으로 변경되었습니다.");
+
         return "redirect:/";
     }
+
+    @PostMapping("/activate")
+    public String activateMember(@RequestParam("email") String email, RedirectAttributes redirectAttributes) {
+        // 이메일 값이 제대로 전달되는지 확인
+        System.out.println("Email received for activation: " + email);
+        if (email == null || email.isEmpty()) {
+            System.out.println("Email is missing or empty"); // 디버깅용
+            redirectAttributes.addFlashAttribute("errorMessage", "이메일을 찾을 수 없습니다.");
+            return "redirect:/members/login";
+        }
+
+        try {
+            memberService.activateMember(email);
+            redirectAttributes.addFlashAttribute("message", "계정이 성공적으로 활성화되었습니다.");
+        } catch (Exception e) {
+            System.out.println("Error while activating account: " + e.getMessage()); // 예외 출력
+            redirectAttributes.addFlashAttribute("errorMessage", "계정 활성화에 실패했습니다.");
+        }
+
+        return "redirect:/";
+    }
+
 }

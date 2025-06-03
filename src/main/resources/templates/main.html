@@ -29,11 +29,55 @@
         .center{
             text-align:center;
         }
+        #toast {
+        visibility: hidden;
+        min-width: 250px;
+        margin-left: -125px;
+        background-color: #333;
+        color: #fff;
+        text-align: center;
+        border-radius: 4px;
+        padding: 16px;
+        position: fixed;
+        z-index: 1000;
+        left: 50%;
+        bottom: 30px;
+        font-size: 17px;
+      }
+
+      #toast.show {
+        visibility: visible;
+        animation: fadein 0.5s, fadeout 0.5s 2.5s;
+      }
+
+      @keyframes fadein {
+        from {bottom: 0; opacity: 0;}
+        to {bottom: 30px; opacity: 1;}
+      }
+
+      @keyframes fadeout {
+        from {bottom: 30px; opacity: 1;}
+        to {bottom: 0; opacity: 0;}
+      }
     </style>
 </th:block>
 
 <div layout:fragment="content">
 
+    <div id="toast"></div>
+    <script th:if="${successMessage != null}">
+        // 메시지 설정
+        const toast = document.getElementById("toast");
+        toast.textContent = /*[[${successMessage}]]*/ "비밀번호가 성공적으로 변경되었습니다.";
+
+        // 토스트 메시지 보여주기
+        toast.className = "show";
+
+        // 3초 후 토스트 숨기기
+        setTimeout(() => {
+          toast.className = toast.className.replace("show", "");
+        }, 3000);
+    </script>
     <div id="carouselControls" class="carousel slide margin" data-ride="carousel">
         <div class="carousel-inner">
             <div class="carousel-item active item">

@@ -37,11 +37,11 @@ public class CustomLoginSuccessHandler implements AuthenticationSuccessHandler {
         // 만료 여부 판단
         PasswordHistory latest = passwordHistoryRepository.findTopByMemberIdOrderByChangedAtDesc(member.getId());
         boolean expired = latest == null || latest.getChangedAt().isBefore(LocalDateTime.now().minusMonths(6));
-        // 변경 이력이 없거나 6개월 이상 지난경우
+        // 변경 이력이 없거나 6개월 이상 지난경우 true
 
         if (expired) {
             // 비밀번호 변경 페이지로 리다이렉트
-            response.sendRedirect("/member/changepassword?expired=true");
+            response.sendRedirect("/members/change-password?expired=true");
         } else {
             // 기본 메인 페이지로 이동
             response.sendRedirect("/");

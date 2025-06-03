@@ -32,7 +32,7 @@ public class MemberService implements UserDetailsService {
         PasswordHistory history = new PasswordHistory();
         history.setMember(savedMember);
         history.setPasswordHash(savedMember.getPassword());
-        history.setChangedAt(LocalDateTime.now().minusMonths(10));
+        history.setChangedAt(LocalDateTime.now());
 
         passwordHistoryRepository.save(history);
 
@@ -44,6 +44,26 @@ public class MemberService implements UserDetailsService {
         if(findMember != null) {
             throw new IllegalStateException("이미 가입된 회원입니다.");
         }
+    }
+
+    @Transactional
+    public void activateMember(String email) {
+        // 이메일로 회원 조회
+        Member member = memberRepository.findByEmail(email);
+
+        if (member == null) {
+            throw new IllegalStateException("해당 이메일의 회원이 존재하지 않습니다.");
+        }
+
+        // 이미 활성화된 회원이면 예외 처리
+        if (member.isActive()) {
+            throw new IllegalStateException("이미 활성화된 계정입니다.");
+        }
+
+        // 계정 활성화
+        member.setActive(true);
+
+        memberRepository.save(member);
     }
 
     @Override

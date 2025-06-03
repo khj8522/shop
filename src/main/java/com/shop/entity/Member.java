@@ -87,14 +87,14 @@ public class Member extends  BaseEntity implements UserDetails {
         return active; // false이면 로그인 차단 (게정 활성화 여부)
     }
 
-    public static Member createMember(MemberFormDto memberFormDto, PasswordEncoder passwordEncoder){
+    public static Member createMember(MemberFormDto memberFormDto, PasswordEncoder passwordEncoder,Role role){
         Member member = new Member();
         member.setName(memberFormDto.getName());
         member.setEmail(memberFormDto.getEmail());
         member.setAddress(memberFormDto.getAddress());
         String password = passwordEncoder.encode(memberFormDto.getPassword());
         member.setPassword(password);
-        member.setRole(Role.ADMIN);
+        member.setRole(role);
         member.setActive(true);
         return member;
     }

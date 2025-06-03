@@ -45,8 +45,16 @@
             <input type="text" th:field="*{address}" class="form-control" placeholder="주소를 입력해주세요">
             <p th:if="${#fields.hasErrors('address')}" th:errors="*{address}" class="fieldError">Incorrect data</p>
         </div>
+        <!-- 역할 선택 추가 -->
+        <div>
+            <label for="role">역할</label>
+            <select id="role" name="role" th:field="*{role}">
+                <option value="USER" th:selected="${memberFormDto.role == 'USER'}">사용자</option>
+                <option value="ADMIN" th:selected="${memberFormDto.role == 'ADMIN'}">관리자</option>
+            </select>
+        </div>
         <div style="text-align: center">
-            <button type="submit" class="btn btn-primary" style="">Submit</button>
+            <button type="submit" class="btn btn-primary" style="">회원가입</button>
         </div>
         <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
     </form>
